@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "manga-ocr-torchless"
+version = "0.1.0"
+authors = [
+  { name="liksunrice", email="liksunrice@gmail.com" },
+]
+description = "Torchless optical character recognition for manga focused Japanese text, lightweight version of kaiserinn's manga-ocr"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License", 
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools.package-data]
+manga_ocr = ["assets/*"]
+dependencies = [
+    "onnxruntime>=1.16.0",
+    "Pillow>=9.0.0",
+    "transformers>=4.30.0",
+    "huggingface_hub>=0.14.0",
+    "numpy>=1.21.0",
+    "pyperclip>=1.8.2",
+    "watchdog>=3.0.0",
+    "jaconv>=0.3.4",
+    "fugashi",
+    "unidic-lite"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0"
+]
+
+[project.scripts]
+manga_ocr = "manga_ocr.__main__:main"
