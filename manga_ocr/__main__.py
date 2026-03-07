@@ -8,7 +8,7 @@ from .ocr import MangaOcr
 def main():
     parser = argparse.ArgumentParser(description="Manga OCR (Torchless/ONNX)")
     parser.add_argument('image_path', type=str, nargs='?', help='Path to an image file to OCR')
-    parser.add_argument('--model', type=str, default='l0wgear/manga-ocr-2025-onnx',
+    parser.add_argument('--model', type=str, default='mayocream/manga-ocr-onnx',
                         help='HuggingFace repo ID or local path to ONNX model')
     parser.add_argument('-b', '--background', action='store_true', help='Run in background, reading from clipboard (requires pyperclip)')
     parser.add_argument('-d', '--directory', type=str, default='', help='Watch directory for new images')
