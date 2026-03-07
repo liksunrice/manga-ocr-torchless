@@ -34,6 +34,8 @@ class MangaOcr:
         # print("MangaOCR ONNX loaded successfully.")
         
     def __call__(self, img: Image.Image, max_length: int = 300) -> str:
+        img = img.convert('L').convert('RGB')
+        
         pixel_values = self.processor(img, return_tensors="np").pixel_values
         
         encoder_outputs = self.encoder_session.run(None, {"pixel_values": pixel_values})
@@ -62,7 +64,6 @@ class MangaOcr:
         
         text = self.tokenizer.decode(input_ids[0], skip_special_tokens=True)
         
-        # Post-processing to match original manga-ocr behavior
         text = ''.join(text.split())
         text = text.replace('…', '...')
         text = re.sub(r'[・.]{2,}', lambda x: (x.end() - x.start()) * '.', text)
