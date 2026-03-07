@@ -18,17 +18,19 @@ class MangaOcr:
         self.bos_token_id = self.tokenizer.cls_token_id or self.tokenizer.bos_token_id
         
         model_path = Path(pretrained_model_name_or_path)
-        if model_path.exists() and model_path.is_dir():
+        encoder_path = model_path / "encoder_model.onnx"
+        decoder_path = model_path / "decoder_model.onnx"
+
+        if model_path.is_dir() and encoder_path.exists() and decoder_path.exists():
             print(f"Loading local ONNX models from {pretrained_model_name_or_path}...")
-            encoder_path = os.path.join(pretrained_model_name_or_path, "encoder_model.onnx")
-            decoder_path = os.path.join(pretrained_model_name_or_path, "decoder_model.onnx")
+            encoder_path = str(encoder_path)
+            decoder_path = str(decoder_path)
         else:
             print(f"Downloading ONNX files if not present from {pretrained_model_name_or_path}...")
             encoder_path = hf_hub_download(repo_id=pretrained_model_name_or_path, filename="encoder_model.onnx")
             decoder_path = hf_hub_download(repo_id=pretrained_model_name_or_path, filename="decoder_model.onnx")
 
         print("Loading ONNX Runtime sessions for MangaOCR...")
-        # Reduce verbosity slightly for end user
         self.encoder_session = ort.InferenceSession(encoder_path, providers=['CPUExecutionProvider'])
         self.decoder_session = ort.InferenceSession(decoder_path, providers=['CPUExecutionProvider'])
         # print("MangaOCR ONNX loaded successfully.")
