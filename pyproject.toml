@@ -13,12 +13,11 @@ readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License", 
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Multimedia :: Graphics",
 ]
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
 keywords = ["ocr", "manga", "japanese", "onnx", "torchless"]
 dependencies = [
     "onnxruntime>=1.16.0",
