@@ -9,7 +9,7 @@ import jaconv
 import re
 
 class MangaOcr:
-    def __init__(self, pretrained_model_name_or_path="mayocream/manga-ocr-onnx"):
+    def __init__(self, pretrained_model_name_or_path="mayocream/manga-ocr-onnx", force_cpu=False):
         print(f"Loading processor and tokenizer from {pretrained_model_name_or_path}...")
         self.processor = ViTImageProcessor.from_pretrained(pretrained_model_name_or_path)
         self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path)
@@ -31,8 +31,28 @@ class MangaOcr:
             decoder_path = hf_hub_download(repo_id=pretrained_model_name_or_path, filename="decoder_model.onnx")
 
         print("Loading ONNX Runtime sessions for MangaOCR...")
-        self.encoder_session = ort.InferenceSession(encoder_path, providers=['CPUExecutionProvider'])
-        self.decoder_session = ort.InferenceSession(decoder_path, providers=['CPUExecutionProvider'])
+        # Prioritize hardware acceleration
+        available_providers = ort.get_available_providers()
+        preferred_providers = [
+            'TensorrtExecutionProvider',   # NVIDIA High Performance
+            'CUDAExecutionProvider',       # NVIDIA Standard
+            'CoreMLExecutionProvider',     # Apple Silicon
+            'DmlExecutionProvider',        # Windows DirectML
+            'OpenVINOExecutionProvider',   # Intel
+            'ROCmExecutionProvider',       # AMD Linux
+            'CPUExecutionProvider'         # Fallback
+        ]
+        
+        if force_cpu:
+            providers = ['CPUExecutionProvider']
+        else:
+            providers = [p for p in preferred_providers if p in available_providers]
+            if not providers:
+                providers = ['CPUExecutionProvider']
+            
+        print(f"Using execution providers: {providers}")
+        self.encoder_session = ort.InferenceSession(encoder_path, providers=providers)
+        self.decoder_session = ort.InferenceSession(decoder_path, providers=providers)
         # print("MangaOCR ONNX loaded successfully.")
         
     def __call__(self, img: Image.Image, max_length: int = 300) -> str:

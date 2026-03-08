@@ -13,9 +13,10 @@ def main():
     parser.add_argument('-b', '--background', action='store_true', help='Run in background, reading from clipboard (requires pyperclip)')
     parser.add_argument('-d', '--directory', type=str, default='', help='Watch directory for new images')
     parser.add_argument('--delay', type=float, default=0.5, help='Delay before reading new files (default 0.5)')
+    parser.add_argument('--force-cpu', action='store_true', help='Force CPU usage even if GPU accelerators are available')
     args = parser.parse_args()
 
-    mocr = MangaOcr(pretrained_model_name_or_path=args.model)
+    mocr = MangaOcr(pretrained_model_name_or_path=args.model, force_cpu=args.force_cpu)
 
     if args.background:
         from .cli import ClipboardHandler
