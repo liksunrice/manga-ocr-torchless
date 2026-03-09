@@ -8,7 +8,7 @@ By default, this package uses [mayocream's onnx export](https://huggingface.co/m
 ## Features
 - **Lightweight:** No PyTorch dependency (~2GB saved).
 - **Parity:** Achieves 100% character-level parity on the original test suite.
-- **Fast:** Optimized for CPU inference using ONNX.
+- **Fast:** Optimized for CPU inference using ONNX, with support for Hardware Acceleration
 
 ## Installation
 
@@ -37,6 +37,19 @@ manga_ocr -b
 manga_ocr -d ./screenshots
 ```
 
+### Full CLI Options
+
+| Argument | Description |
+| :--- | :--- |
+| `image_path` | (Optional) Path to an image file to OCR. |
+| `-m`, `--model` | HuggingFace repo ID or local path to ONNX model. |
+| `-b`, `--background` | Run in background, reading from clipboard (requires `pyperclip`). |
+| `-d`, `--directory` | Watch directory for new images (requires `watchdog`). |
+| `--force-cpu` | Force CPU usage even if GPU accelerators are available. |
+| `-v`, `--verbose` | Increase output verbosity (shows DEBUG logs). |
+| `-q`, `--quiet` | Suppress all output except OCR results. |
+| `--delay` | Delay (in seconds) before reading new files in directory mode. |
+
 ### Python API
 
 ```python
@@ -64,6 +77,32 @@ mocr = MangaOcr(pretrained_model_name_or_path="./local_model_directory")
 ```bash
 manga_ocr --model "user/repo-id" path/to/image.jpg
 ```
+
+## GPU Acceleration
+
+By default, this package uses your CPU for inference. However, it automatically detects and uses hardware acceleration if you have the appropriate ONNX Runtime execution provider installed:
+
+**For NVIDIA GPUs (CUDA):**
+```bash
+pip install onnxruntime-gpu
+```
+
+**For Windows (DirectML - works on AMD, Intel, NVIDIA):**
+```bash
+pip install onnxruntime-directml
+```
+
+**For macOS (Apple Silicon / CoreML):**
+```bash
+pip install onnxruntime-silicon # or standard onnxruntime which includes CoreML
+```
+
+**For Intel CPUs/GPUs (OpenVINO):**
+```bash
+pip install onnxruntime-openvino
+```
+
+*Note: You may need to uninstall the standard `onnxruntime` first to avoid conflicts.*
 
 ## Acknowledgments
 This project is a direct port of [manga-ocr](https://github.com/kha-white/manga-ocr) by **kha-white**. All credit for the model architecture and training belongs to them. This version simply swaps the backend to ONNX for a leaner distribution.
