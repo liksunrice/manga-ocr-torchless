@@ -7,10 +7,13 @@ import os
 from pathlib import Path
 import jaconv
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class MangaOcr:
     def __init__(self, pretrained_model_name_or_path="mayocream/manga-ocr-onnx", force_cpu=False):
-        print(f"Loading processor and tokenizer from {pretrained_model_name_or_path}...")
+        logger.debug(f"Loading processor and tokenizer from {pretrained_model_name_or_path}...")
         self.processor = ViTImageProcessor.from_pretrained(pretrained_model_name_or_path)
         self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path)
         
@@ -22,15 +25,15 @@ class MangaOcr:
         decoder_path = model_path / "decoder_model.onnx"
 
         if model_path.is_dir() and encoder_path.exists() and decoder_path.exists():
-            print(f"Loading local ONNX models from {pretrained_model_name_or_path}...")
+            logger.debug(f"Loading local ONNX models from {pretrained_model_name_or_path}...")
             encoder_path = str(encoder_path)
             decoder_path = str(decoder_path)
         else:
-            print(f"Downloading ONNX files if not present from {pretrained_model_name_or_path}...")
+            logger.debug(f"Downloading ONNX files if not present from {pretrained_model_name_or_path}...")
             encoder_path = hf_hub_download(repo_id=pretrained_model_name_or_path, filename="encoder_model.onnx")
             decoder_path = hf_hub_download(repo_id=pretrained_model_name_or_path, filename="decoder_model.onnx")
 
-        print("Loading ONNX Runtime sessions for MangaOCR...")
+        logger.debug("Loading ONNX Runtime sessions for MangaOCR...")
         # Prioritize hardware acceleration
         available_providers = ort.get_available_providers()
         preferred_providers = [
@@ -50,7 +53,7 @@ class MangaOcr:
             if not providers:
                 providers = ['CPUExecutionProvider']
             
-        print(f"Using execution providers: {providers}")
+        logger.debug(f"Using execution providers: {providers}")
         self.encoder_session = ort.InferenceSession(encoder_path, providers=providers)
         self.decoder_session = ort.InferenceSession(decoder_path, providers=providers)
         # print("MangaOCR ONNX loaded successfully.")
@@ -75,7 +78,7 @@ class MangaOcr:
             try:
                 logits = self.decoder_session.run(None, decoder_inputs)[0]
             except Exception as e:
-                print(f"Decoder run failed: {e}")
+                logger.error(f"Decoder run failed: {e}")
                 break
                 
             next_token = np.argmax(logits[:, -1, :], axis=-1)[0]
